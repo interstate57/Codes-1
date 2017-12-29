@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from numpy.polynomial.polynomial import *
 
-from GF import Poly, F2, euclid, value
+from GF import Poly, F2, F2Q, euclid, value
 
 data = [
     [1, 1, 0, 0, 1],    # x^4 + x + 1
@@ -13,9 +13,11 @@ data = [
     [1],                # 1
     [0],
     [1, 1, 0, 1],
-    [0, 1]
+    [0, 1],
+    [1, 0, 0, 1]
 ]
 
+# FIXME: use toF2
 data_poly = list(map(
     lambda x: Poly(x),
     map(
@@ -24,7 +26,7 @@ data_poly = list(map(
     )
 ))
 
-a,b,c,d,e,f,g,h = data_poly
+a,b,c,d,e,f,g,h,i = data_poly
 
 
 class TestEverything(unittest.TestCase):
@@ -56,7 +58,19 @@ class TestEverything(unittest.TestCase):
             one / zero
 
     def test_f2q(self):
-        pass
+        module = a
+        one = F2Q(e, module)
+        zero = F2Q(f, module)
+        x = F2Q(h, module)
+        another_x = F2Q(h, module)
+        x3plus1 = F2Q(i, module)
+        self.assertEqual(x, another_x)
+        self.assertEqual(x * x3plus1, one)
+        self.assertEqual(x3plus1 * x, one)
+        self.assertEqual(one / x3plus1, x)
+        self.assertEqual(one / x, x3plus1)
+        self.assertEqual(x + x, x - x)
+        self.assertEqual(x3plus1 + x3plus1, zero)
 
 
 if __name__ == "__main__":

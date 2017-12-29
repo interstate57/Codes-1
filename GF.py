@@ -1,5 +1,3 @@
-#from euclid import euclid
-
 import numpy as np
 from numpy.polynomial.polynomial import *
 
@@ -91,25 +89,58 @@ class Poly(Polynomial):
             return False
         return True
 
-"""
-a_args = [1, 0, 1] # x^2 + 1
-b_args = [0, 1] # x 
+    def __repr__(self):
+        return str(list(self.coef))
 
-a_args = [F2(x) for x in a_args]
-b_args = [F2(x) for x in b_args]
 
-poly_a = Poly(a_args)
-poly_b = Poly(b_args)
+def makeF2(array):
+    return [F2(x) for x in array]
 
-def Testing(poly_a, poly_b):
-    res = euclid(poly_a, poly_b)
-    for x in res:
-        print(x)
 
-    print('---')
-    print("{0} = {1} * {2} + {3} * {4} = {5}".format(res[0], poly_a, res[1], poly_b, res[2], res[1] * poly_a + res[2] * poly_b))
+def assertSameModule(lhs, rhs):
+    if not lhs.P == rhs.P:
+        raise RuntimeError("Different modules detected")
 
-Testing(poly_a, poly_b) # Success!
-Testing(poly_b, poly_a) # Success!
+class F2Q:
+    # ``module'' should be an irreducible F2[x]
+    def __init__(self, poly, module):
+        self.polynom = poly % module
+        self.P = module
 
-"""
+    @staticmethod
+    def one(module):
+        return F2Q(Poly(makeF2([1])), module)
+
+    def zero(module):
+        return F2Q(Poly(makeF2([0])), module)
+
+    def __eq__(self, other):
+        assertSameModule(self, other)
+        return self.polynom == other.polynom
+
+    def __mul__(self, other):
+        assertSameModule(self, other)
+        return F2Q((self.polynom * other.polynom) % self.P, self.P)
+
+    def __truediv__(self, other):
+        assertSameModule(self, other)
+        print (type(other.polynom), type(self.P))
+        gcd, k, l = euclid(other.polynom, self.P)
+        inverse = F2Q(k, self.P)
+        return self * inverse
+
+    def __add__(self, other):
+        assertSameModule(self, other)
+        return F2Q((self.polynom + other.polynom) % self.P, self.P)
+
+    def __sub__(self, other):
+        assertSameModule(self, other)
+        return F2Q((self.polynom - other.polynom) % self.P, self.P)
+
+    def __str__(self):
+        #return self.polynom.__repr__()
+        return self.polynom.__repr__() + " mod " + self.P.__repr__()
+
+    def __repr__(self):
+        return self.polynom.__repr__() + " mod " + self.P.__repr__()
+
