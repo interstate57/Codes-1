@@ -1,4 +1,4 @@
-from euclid import euclid
+#from euclid import euclid
 
 import numpy as np
 from numpy.polynomial.polynomial import *
@@ -13,6 +13,26 @@ Realization of F2 class:
 """
 def value(obj):
     return int(obj)
+
+def euclid(A, B):
+    a = A
+    b = B
+    c1 = Poly(F2(1))
+    c2 = Poly(F2(0))
+    d1 = Poly(F2(0))
+    d2 = Poly(F2(1))
+
+    while b.notNull():
+        q = a // b
+        r = a - b*q
+        c1, c2 = c2, c1 - q * c2
+        d1, d2 = d2, d1 - q * d2
+        a = b
+        b = r
+    NOD = a
+    #a = c1 * A + d1 * B
+    return (NOD, c1, d1)
+
 
 class F2:
     # consists of : value (0, 1) + operations
@@ -50,10 +70,10 @@ class F2:
         return self.__sub__(other)
 
     def __mul__(self, other):
-        return F2((value(self) * value(other)) % 2)
+        return F2((value(self) * value(other)))
 
     def __rmul__(self, other):
-        return F2((value(self) * value(other)) % 2)
+        return __mul__(self, other)
 
     def __rtruediv__(self, other):
         return self.__truediv(other)
@@ -71,7 +91,7 @@ class Poly(Polynomial):
             return False
         return True
 
-
+"""
 a_args = [1, 0, 1] # x^2 + 1
 b_args = [0, 1] # x 
 
@@ -92,12 +112,4 @@ def Testing(poly_a, poly_b):
 Testing(poly_a, poly_b) # Success!
 Testing(poly_b, poly_a) # Success!
 
-
-
-
-
-
-
-
-
-
+"""

@@ -1,3 +1,6 @@
+from GF import Poly
+
+
 def notNull(b):
     print(b.degree())
     pass
@@ -6,10 +9,10 @@ def notNull(b):
 def euclid(A, B):
     a = A
     b = B
-    c1 = 1
-    c2 = 0
-    d1 = 0
-    d2 = 1
+    c1 = Poly(F2(1))
+    c2 = Poly(F2(0))
+    d1 = Poly(F2(0))
+    d2 = Poly(F2(1))
 
     while b.notNull():
         q = a // b
