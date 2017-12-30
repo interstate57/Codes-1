@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from numpy.polynomial.polynomial import *
 
-from GF import Poly, F2, F2Q, euclid, value
+from GF import Poly, F2, F2Q, euclid, value, to_poly, to_dec, gen_pow_matrix#, min_poly
 
 data = [
     [1, 1, 0, 0, 1],    # x^4 + x + 1
@@ -40,7 +40,6 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(gcd, e)
         self.assertEqual(k, h)
         self.assertEqual(l, g)
-        #print ("k:", k, "\n", "l:", l)
 
     def test_f2(self):
         zero = F2(0)
@@ -71,6 +70,20 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(one / x, x3plus1)
         self.assertEqual(x + x, x - x)
         self.assertEqual(x3plus1 + x3plus1, zero)
+
+    def test_pow_matrix(self):
+        self.assertEqual(to_poly(19), a)
+        self.assertEqual(to_dec(a), 19)
+        result = gen_pow_matrix(11)
+        print (result)
+
+    def test_min_poly(self):
+        primitive = F2Q(h, g)
+        pass
+        #min_poly([primitive, primitive * primitive, primitive*primitive*primitive])
+        #aa = Poly([F2Q.one(g)], domain=F2Q)
+        #bb = Poly([F2Q.zero(g), F2Q.one(g)], domain=F2Q)
+        #cc = bb * aa
 
 
 if __name__ == "__main__":
