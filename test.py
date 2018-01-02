@@ -195,6 +195,22 @@ class TestGF(TestBase):
         self.assertEqual(is_zero([0, 4]), False)
 
 
+class TestSolve(TestBase):
+    def test_linsolve(self):
+        pm = gen_pow_matrix(19)
+        A = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        b = np.array([1, 1, 1])
+        self.assertEqualArrays(linsolve(A, b, pm), [1, 1, 1])
+
+        A = np.array([[2, 1, 3], [1, 3, 5], [3, 5, 4]])
+        b = np.array([5, 4, 2])
+        self.assertEqualArrays(linsolve(A, b, pm), [15, 13, 3])
+
+        A = np.array([[0, 0], [1, 0]])
+        b = np.array([1, 1])
+        self.assertEqual(np.isnan(linsolve(A, b, pm)[0]), True)
+
+
 class TestBCH(TestBase):
     def test_hamming_distance(self):
         self.assertEqual(hamming_distance(57, 9), 2)
@@ -283,24 +299,6 @@ class TestBCH(TestBase):
         encoded[8] = 1 - encoded[8]
         self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
         self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
-
-    def _test_compare_methods_big(self):
-        bch = BCH(15, 3)
-        msg = [0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1]
-        #for message in bch._all_codewords():
-        for message in [msg]:
-            result = bch._decode_one(message)
-            self.assertEqualArrays(message[:bch.k], result)
-            print ("Pizda")
-            for i in [1]:
-                for comb in combinations(range(bch.n), i):
-                    new_message = copy(message)
-                    for k in comb:
-                        new_message[k] = 1 - new_message[k]
-                    result = bch._decode_one(new_message, 'euclid')
-                    self.assertEqualArrays(result, message[:bch.k])
-
-
 
     def test_decode(self):
         print ("Caution: long test")

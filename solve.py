@@ -71,29 +71,3 @@ def linsolve(A, b, pm):
             pm
         )
     return x
-
-"""
-if __name__ == "__main__":
-    #A = np.array([[2., 0.], [0., 1.]])
-    #b = np.array([1., 1.])
-
-    #A = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
-    #b = np.array([1, 1, 1])
-
-    #A = np.array([[2, 1], [1, 1]])
-    #b = np.array([1, 1])
-
-    #A = np.array([[2, 4, 5], [4, 5, 3], [5, 3, 1]])
-    #b = np.array([3, 1, 2])
-
-    #A = np.array([[2, 1, 3], [1, 3, 5], [3, 5, 4]])
-    #b = np.array([5, 4, 2])
-
-    #A = np.array([1, 0, 0[], [], []])
-    #b = np.array([])
-
-    pm = gen_pow_matrix(19)
-
-    result = linsolve(A, b, pm)
-    print(result)
-"""
