@@ -338,10 +338,12 @@ def degree(ar):
         return -1
     return len(ar) - 1
 
+# Add leading zeroes to a polynomial
+def deg_resize(p, deg):
+    diff = deg + 1 - len(p)
+    return np.array([0] * diff + list(p))
+
 def polydiv(p1, p2, pm):
-    def deg_resize(p, deg):
-        diff = deg + 1 - len(p)
-        return np.array([0] * diff + list(p))
 
     a, b = p1, p2
 

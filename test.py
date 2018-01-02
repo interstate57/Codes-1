@@ -8,6 +8,8 @@ from GF import plus, minus, mult, div, power
 from GF import polyprod, min_poly, shift, polyadd, polysub, polydiv, polyval, set_degree, euclid, is_zero
 from GF import Poly, F2, F2Q, euclid_poly, value, to_poly, to_dec, gen_pow_matrix
 
+from solve import linsolve
+
 from bch import BCH, hamming_distance, choose_poly
 
 
@@ -236,22 +238,68 @@ class TestBCH(TestBase):
             decoded = bch._decode_one(encoded)
             self.assertEqualArrays(msg, decoded)
 
-    def check_decode_with_errors(self, n, t):
+    def check_decode_with_errors(self, n, t, method):
         bch = BCH(15, 3)
 
         #msg = [0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1] # no mistakes
         #msg.reverse()
         #msg = [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1] # 3 mistakes
         for message in bch._all_codewords():
-            result = bch._decode_one(message)
+            result = bch._decode_one(message, method=method)
             self.assertEqualArrays(message[:bch.k], result)
             for i in [1, 2, 3]:
                 for comb in combinations(range(bch.n), i):
                     new_message = copy(message)
                     for k in comb:
                         new_message[k] = 1 - new_message[k]
-                    result = bch._decode_one(new_message)
+                    result = bch._decode_one(new_message, method=method)
                     self.assertEqualArrays(result, message[:bch.k])
+
+
+    def test_compare_methods_internal(self):
+        bch = BCH(15, 3)
+        s = [13, 7, 3, 9, 4, 2, 1]
+        by_euclid, er1 = bch._euclid(s)
+        by_pgz, er2 = bch._pgz(s)
+        self.assertEqual(er1, False)
+        self.assertEqual(er2, False)
+        self.assertEqualArrays(by_euclid, by_pgz)
+
+    def test_compare_methods(self):
+        bch = BCH(15, 3)
+        word = [0, 0, 1, 1, 1]
+        encoded = bch._encode_one(word)
+        # 1 mistake
+        encoded[2] = 1 - encoded[2]
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
+
+        # 2 mistakes
+        encoded[5] = 1 - encoded[5]
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
+
+        # 3 mistakes
+        encoded[8] = 1 - encoded[8]
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
+        self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
+
+    def _test_compare_methods_big(self):
+        bch = BCH(15, 3)
+        msg = [0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1]
+        #for message in bch._all_codewords():
+        for message in [msg]:
+            result = bch._decode_one(message)
+            self.assertEqualArrays(message[:bch.k], result)
+            print ("Pizda")
+            for i in [1]:
+                for comb in combinations(range(bch.n), i):
+                    new_message = copy(message)
+                    for k in comb:
+                        new_message[k] = 1 - new_message[k]
+                    result = bch._decode_one(new_message, 'euclid')
+                    self.assertEqualArrays(result, message[:bch.k])
+
 
 
     def test_decode(self):
@@ -260,12 +308,8 @@ class TestBCH(TestBase):
         self.check_decode_codewords(7, 2)
         self.check_decode_codewords(15, 2)
         self.check_decode_codewords(15, 3)
-        self.check_decode_with_errors(7, 1)
-
-    def _test_decode(self):
-        bch = BCH(15, 3)
-        with_errors = [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-        self.assertEqualArrays(bch._decode_one(with_errors), [0, 1, 1, 1, 1])
+        self.check_decode_with_errors(7, 1, 'euclid')
+        self.check_decode_with_errors(15, 3, 'pgz')
 
 
 if __name__ == "__main__":

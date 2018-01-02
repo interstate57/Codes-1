@@ -87,8 +87,8 @@ class BCH:
         a = np.array([1] + [0] * (2*self.t + 1))
         b = s
         nod, k, l = euclid(a, b, self.pm, self.t)
-        # result: sigma(x) polynomial
-        return l, False # FIXME: what about false cases?
+        # result: sigma(x) polynomial. False positive cases will be checked outside, in _decode
+        return l, False
 
     def _decode_one(self, _w, method='euclid'):
         w = copy(_w)
@@ -107,11 +107,12 @@ class BCH:
             else:
                 raise LogicError("Unknown decode method")
             if error_happened:
-                # FIXME: return array of nans
-                pass
+                return np.array([np.nan for i in range(self.n)])
 
             # find roots
             locator_roots = list(filter(lambda x: polyval(error_locator, power(2, x, self.pm), self.pm) == 0, range(1, 2**self.q)))
+            if len(locator_roots) != degree(error_locator):
+                return np.array([np.nan for i in range(self.n)])
             # correct the word
             for root in locator_roots:
                 w[root - 1] = 1 - w[root - 1]
@@ -127,11 +128,9 @@ class BCH:
         s.reverse()
         for r in range(self.t, 0, -1):
             # build matrix
-            A = [s[i:i+r] for i in range(i, r+1)]
-            b = s[r+1:2*r+1]
+            A = np.array([s[i:i+r] for i in range(1, r+1)])
+            b = np.array(s[r+1:2*r+1])
             result = linsolve(A, b, self.pm)
-            if result != np.nan:
-                return np.array(list(result) + [1]), True
-            else:
-                return None, False
-        return None, False
+            if not np.isnan(result[0]):
+                return np.array(list(result) + [1]), False
+        return None, True
