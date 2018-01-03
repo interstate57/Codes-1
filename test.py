@@ -292,7 +292,7 @@ class TestBCH(TestBase):
         self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
         self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
 
-    def _test_decode(self):
+    def test_decode(self):
         print ("Caution: long test")
         self.check_decode_codewords(7, 1)
         self.check_decode_codewords(7, 2)
