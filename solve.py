@@ -4,7 +4,8 @@ from functools import reduce
 from GF import plus, minus, mult, div, gen_pow_matrix
 
 
-# --- row operations ---
+# ------------- row operations -------------
+
 def row_plus(a, b):
     assert len(a) == len(b), "Can't add vectors of different length"
     return list(map(lambda x: plus(x[0], x[1]), zip(a, b)))
@@ -22,7 +23,7 @@ def scalar_mult(a, b, pm):
         result = plus(result, mult(x, y, pm))
     return result
 
-# ----------------------
+# ------------------------------------------------
 
 def choose_nonzero_row(A, _k):
     k = _k
@@ -42,7 +43,7 @@ def linsolve(A, b, pm):
     for k in range(n):
         # Maybe A[k, k] = 0. Swap line k with some better underlying one.
         nonzero_row = choose_nonzero_row(A, k)
-        if np.isnan(nonzero_row): # no suitable rows. FIXME
+        if np.isnan(nonzero_row): # no suitable rows.
             return np.array([np.nan] * b.shape[0])
         if nonzero_row != k:
             A[k, :], A[nonzero_row, :] = A[nonzero_row, :], np.copy(A[k, :])

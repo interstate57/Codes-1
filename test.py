@@ -6,7 +6,7 @@ from itertools import combinations
 
 from GF import plus, minus, mult, div, power
 from GF import polyprod, min_poly, shift, polyadd, polysub, polydiv, polyval, set_degree, euclid, is_zero
-from GF import Poly, F2, F2Q, euclid_poly, value, to_poly, to_dec, gen_pow_matrix
+from GF import Poly, F2, F2Q, euclid_poly, value, to_poly, to_dec, gen_pow_matrix, to_rev_poly
 
 from solve import linsolve
 
@@ -226,10 +226,6 @@ class TestBCH(TestBase):
         self.assertEqual(set(bch.R), set([2, 4, 6, 3, 5, 7]))
         self.assertEqual(bch.dist(), 7)
 
-        # cases of extra distance: 31 & 6; 63 & 14; 127 & 30
-        #bch = BCH(127, 30)
-        #print(bch.dist())
-
     def test_encode_1(self):
         bch = BCH(7, 1)
         U = np.array([[1, 1, 0, 1], [1, 0, 0, 0]])
@@ -256,10 +252,6 @@ class TestBCH(TestBase):
 
     def check_decode_with_errors(self, n, t, method):
         bch = BCH(15, 3)
-
-        #msg = [0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1] # no mistakes
-        #msg.reverse()
-        #msg = [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1] # 3 mistakes
         for message in bch._all_codewords():
             result = bch._decode_one(message, method=method)
             self.assertEqualArrays(message[:bch.k], result)
@@ -300,7 +292,7 @@ class TestBCH(TestBase):
         self.assertEqualArrays(word, bch._decode_one(encoded, method='euclid'))
         self.assertEqualArrays(word, bch._decode_one(encoded, method='pgz'))
 
-    def test_decode(self):
+    def _test_decode(self):
         print ("Caution: long test")
         self.check_decode_codewords(7, 1)
         self.check_decode_codewords(7, 2)
@@ -308,6 +300,17 @@ class TestBCH(TestBase):
         self.check_decode_codewords(15, 3)
         self.check_decode_with_errors(7, 1, 'euclid')
         self.check_decode_with_errors(15, 3, 'pgz')
+        self.check_decode_all_images(15, 3)
+
+    # Compare decoders' results for all possible inputs.
+    def check_decode_all_images(self, n, t):
+        all_messages = [list(set_degree(to_rev_poly(dec), n)) for dec in range(2**n-1)]
+        bch = BCH(n, t)
+        for message in all_messages:
+            result1 = bch._decode_one(message, 'euclid')
+            result2 = bch._decode_one(message, 'pgz')
+            if not np.isnan(result1[0]) and np.isnan(result2[0]):
+                self.assertEqualArrays(result1, result2)
 
 
 if __name__ == "__main__":

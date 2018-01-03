@@ -119,6 +119,7 @@ def assertSameModule(lhs, rhs):
     if not lhs.P == rhs.P:
         raise RuntimeError("Different modules detected")
 
+# Usual, slow F2Q.
 class F2Q:
     # ``module'' should be an irreducible F2[x]
     def __init__(self, poly, module):

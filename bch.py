@@ -4,7 +4,7 @@ from copy import copy
 from itertools import combinations
 
 from GF import gen_pow_matrix, min_poly, F2Q, power, shift, Poly, makeF2, to_rev_poly, to_dec, set_degree, from_rev_poly, degree
-from GF import polyval, euclid, is_zero
+from GF import polyval, euclid, is_zero, polydiv
 from solve import linsolve
 
 
@@ -38,6 +38,10 @@ class BCH:
         a = min_poly(necessary_roots, self.pm)
         self.g, self.R = a[0], a[1]
         self.k = self.n - degree(self.g)
+
+        x_n_minus_one = np.array([1] + [0] * (self.n - 1) + [1])
+        q, r = polydiv(x_n_minus_one, self.g, self.pm)
+        assert degree(r) == -1, "Internal error: g(x) is not a divisor of x^n - 1"
 
     def encode(self, U):
         # Encode with g(x) and return a matrix
@@ -107,12 +111,12 @@ class BCH:
             else:
                 raise LogicError("Unknown decode method")
             if error_happened:
-                return np.array([np.nan for i in range(self.n)])
+                return np.array([np.nan for i in range(self.k)])
 
             # find roots
             locator_roots = list(filter(lambda x: polyval(error_locator, power(2, x, self.pm), self.pm) == 0, range(1, 2**self.q)))
             if len(locator_roots) != degree(error_locator):
-                return np.array([np.nan for i in range(self.n)])
+                return np.array([np.nan for i in range(self.k)])
             # correct the word
             for root in locator_roots:
                 w[root - 1] = 1 - w[root - 1]
