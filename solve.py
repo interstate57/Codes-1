@@ -25,6 +25,22 @@ def scalar_mult(a, b, pm):
 
 # ------------------------------------------------
 
+def elementwise_operation(X, Y, func):
+    assert X.shape == Y.shape, "Can't perform operation on arrays of different dimensions"
+    shape = X.shape
+    return np.array(list(map(lambda lst: func(lst[0], lst[1]), np.dstack((X, Y)).reshape(shape[0] * shape[1], 2)))).reshape(shape)
+
+def add(X, Y):
+    return elementwise_operation(X, Y, plus)
+
+def prod(X, Y, pm):
+    return elementwise_operation(X, Y, lambda a, b: mult(a, b, pm))
+
+def divide(X, Y, pm):
+    return elementwise_operation(X, Y, lambda a, b: div(a, b, pm))
+
+# ------------------------------------------------
+
 def choose_nonzero_row(A, _k):
     k = _k
     while k < A.shape[0] and A[k, _k] == 0:
